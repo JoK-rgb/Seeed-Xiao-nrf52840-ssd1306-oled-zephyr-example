@@ -45,29 +45,31 @@ void main(void)
     /* Clear the frame buffer */
     memset(frame_buffer, 0, sizeof(frame_buffer));
 
-    displayString(display, buf_desc, "Hello", 0, 0);
+    displayString(display, &buf_desc, "Hello", 0, 0);
     k_sleep(K_SECONDS(3));
-    displayString(display, buf_desc, "World", 0, 10);
+    displayString(display, &buf_desc, "World", 0, 10);
     k_sleep(K_SECONDS(3));
-    clearDisplay(display, buf_desc);
+    displayString(display, &buf_desc, ":)", 0, 20);
+    k_sleep(K_SECONDS(3));
+    clearDisplay(display, &buf_desc);
     
     while (1) {
         k_sleep(K_SECONDS(1));
     }
 }
 
-void displayString(const struct device *display, struct display_buffer_descriptor buf_desc, const char *str, int x, int y) {
+void displayString(const struct device *display, struct display_buffer_descriptor *buf_desc, const char *str, int x, int y) {
   draw_string_page_based(frame_buffer, x, y, str, SSD1306_WIDTH);
-  int ret = display_write(display, 0, 0, &buf_desc, frame_buffer);
+  int ret = display_write(display, 0, 0, buf_desc, frame_buffer);
   if (ret < 0) {
       LOG_ERR("Failed to write to display (err %d)", ret);
       return;
   }
 }
 
-void clearDisplay(const struct device *display, struct display_buffer_descriptor buf_desc) {
+void clearDisplay(const struct device *display, struct display_buffer_descriptor *buf_desc) {
   memset(frame_buffer, 0, sizeof(frame_buffer));
-  int ret = display_write(display, 0, 0, &buf_desc, frame_buffer);
+  int ret = display_write(display, 0, 0, buf_desc, frame_buffer);
   if (ret < 0) {
       LOG_ERR("Failed to write to display (err %d)", ret);
       return;
