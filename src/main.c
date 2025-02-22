@@ -34,28 +34,42 @@ void main(void)
         return;
     }
 
+    /* Prepare the display buffer descriptor */
+    struct display_buffer_descriptor buf_desc = {
+      .width    = SSD1306_WIDTH,
+      .height   = SSD1306_HEIGHT,
+      .pitch    = SSD1306_WIDTH,
+      .buf_size = sizeof(frame_buffer)
+    };
+
     /* Clear the frame buffer */
     memset(frame_buffer, 0, sizeof(frame_buffer));
 
-    /* Draw "Hello World" at (0, 0) using page-based helpers from font.h */
-    draw_string_page_based(frame_buffer, 0, 0, "Hello World", SSD1306_WIDTH);
-
-    /* Prepare the display buffer descriptor */
-    struct display_buffer_descriptor buf_desc = {
-        .width    = SSD1306_WIDTH,
-        .height   = SSD1306_HEIGHT,
-        .pitch    = SSD1306_WIDTH,
-        .buf_size = sizeof(frame_buffer)
-    };
-
-    /* Write the frame buffer to the display */
-    int ret = display_write(display, 0, 0, &buf_desc, frame_buffer);
-    if (ret < 0) {
-        LOG_ERR("Failed to write to display (err %d)", ret);
-        return;
-    }
-
+    displayString(display, buf_desc, "Hello", 0, 0);
+    k_sleep(K_SECONDS(3));
+    displayString(display, buf_desc, "World", 0, 10);
+    k_sleep(K_SECONDS(3));
+    clearDisplay(display, buf_desc);
+    
     while (1) {
         k_sleep(K_SECONDS(1));
     }
+}
+
+void displayString(const struct device *display, struct display_buffer_descriptor buf_desc, const char *str, int x, int y) {
+  draw_string_page_based(frame_buffer, x, y, str, SSD1306_WIDTH);
+  int ret = display_write(display, 0, 0, &buf_desc, frame_buffer);
+  if (ret < 0) {
+      LOG_ERR("Failed to write to display (err %d)", ret);
+      return;
+  }
+}
+
+void clearDisplay(const struct device *display, struct display_buffer_descriptor buf_desc) {
+  memset(frame_buffer, 0, sizeof(frame_buffer));
+  int ret = display_write(display, 0, 0, &buf_desc, frame_buffer);
+  if (ret < 0) {
+      LOG_ERR("Failed to write to display (err %d)", ret);
+      return;
+  }
 }
